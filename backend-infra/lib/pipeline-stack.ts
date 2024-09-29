@@ -15,10 +15,12 @@ export class PipelineStack extends cdk.Stack {
         primaryOutputDirectory: 'backend-infra/cdk.out'
       }),
     });
-
-    pipeline.addStage(new MyBackendStage(this, 'Test', {
+    const testingStage =  pipeline.addStage(new MyBackendStage(this, 'Test', {
       env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
     }));
+
+    testingStage.addPost(new pipelines.ManualApprovalStep('manual approval before production'))
+
 
     pipeline.addStage(new MyBackendStage(this, 'Prod', {
       env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
