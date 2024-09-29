@@ -2,9 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { MyBackendStage } from './stage';
-import * as dotenv from 'dotenv';
-import path = require('path');
-dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -14,7 +11,7 @@ export class PipelineStack extends cdk.Stack {
       pipelineName: 'MyBackendPipeline',
       synth: new pipelines.ShellStep('Synth', {
         input: pipelines.CodePipelineSource.gitHub('MayseenAidoudi/Apply-AI', 'main'),
-        commands: ['npm ci', 'npm run build', 'npx cdk synth'],
+        commands: ['cd backend-infra','npm ci', 'npm run build', 'npx cdk synth'],
       }),
     });
 
