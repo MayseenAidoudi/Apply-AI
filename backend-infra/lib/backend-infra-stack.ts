@@ -8,7 +8,7 @@ export class MyBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    
+
     // Create a Lambda Layer with custom build for Selenium and its dependencies
     const seleniumLayer = new lambda.LayerVersion(this, 'SeleniumLayer', {
       code: lambda.Code.fromAsset('lambda-layer', {
@@ -34,7 +34,7 @@ export class MyBackendStack extends cdk.Stack {
  const apiScrapingLambda = new lambda.Function(this, 'ScrapingLambda', {
   runtime: lambda.Runtime.PYTHON_3_9,
   code: lambda.Code.fromAsset('lambda'),
-  handler: 'scraping_handler.handler',
+  handler: 'api_scraping_lambda.handler',
   timeout: cdk.Duration.seconds(60),  // Increased timeout for web scraping and Bedrock call
   memorySize: 2048,  // Increased memory for Selenium
   layers: [seleniumLayer],
