@@ -12,6 +12,7 @@ export class PipelineStack extends cdk.Stack {
       synth: new pipelines.ShellStep('Synth', {
         input: pipelines.CodePipelineSource.gitHub('MayseenAidoudi/Apply-AI', 'main'),
         commands: ['cd backend-infra','npm ci', 'npm run build', 'npx cdk synth'],
+        primaryOutputDirectory: 'backend-infra/cdk.out'
       }),
     });
 
