@@ -3,7 +3,8 @@ import { Construct } from 'constructs';
 import * as pipelines from 'aws-cdk-lib/pipelines';
 import { MyBackendStage } from './stage';
 import * as dotenv from 'dotenv';
-dotenv.config();
+import path = require('path');
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
