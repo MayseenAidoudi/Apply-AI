@@ -24,10 +24,12 @@ os.environ['CHROME_BINARY_PATH'] = chrome_binary_path
 class UrlInput(BaseModel):
     url: HttpUrl
 
+    
+
 def scrape_job_offer(url):
     # Set up paths for the binary and chromedriver
-    chromedriver_path = "/opt/chromedriver"  # Update this path based on your setup
-    chrome_binary_path = "/opt/headless-chromium"  # Update this path based on your setup
+    chromedriver_path = "/opt/chrome-driver/chromedriver-linux64/chromedriver"  # Update this path based on your setup
+    chrome_binary_path = "/opt/chrome/chrome-linux64/chrome"  # Update this path based on your setup
 
     # Set up Selenium with Chrome in headless mode
     chrome_options = Options()
@@ -43,7 +45,7 @@ def scrape_job_offer(url):
 
     # Pass the service and options to the Chrome WebDriver
     driver = webdriver.Chrome(service=service, options=chrome_options)
-
+'''
     try:
         driver.get(url)
 
@@ -58,6 +60,7 @@ def scrape_job_offer(url):
 
         # Parse the page source with BeautifulSoup
         html_content = driver.page_source
+        print(html_content)
         soup = BeautifulSoup(html_content, 'html.parser')
 
         # Extract job details
@@ -89,7 +92,7 @@ def scrape_job_offer(url):
 
     finally:
         driver.quit()
-
+'''
 def query_bedrock(job_data):
     prompt = f"""Analyze the following job offer and provide key insights:
 
@@ -113,22 +116,44 @@ Please provide:
 
     try:
         response = bedrock.invoke_model(
-            modelId="anthropic.claude-v2",  # Use the appropriate model ID
+            modelId="meta.llama3-8b-instruct-v1:0",  # Use the appropriate model ID
             body=json.dumps({
                 "prompt": prompt,
-                "max_tokens_to_sample": 500,
+                "max_gen_len": 500,
                 "temperature": 0.7,
                 "top_p": 1,
             })
         )
         
-        return json.loads(response['body'].read())['completion']
+        return json.loads(response['body'].read())['generation']
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while querying Bedrock: {str(e)}")
 
 @app.post("/scrapeJobOffer")
 async def scrape_job_offer_endpoint(url_input: UrlInput):
-    job_data = scrape_job_offer(str(url_input.url))
+    job_data = {
+    "title": "Software Engineer",
+    "company": "Tech Innovators Inc.",
+    "location": "Remote",
+    "job_type": "Full-Time",
+    "skills_required": [
+        "Python",
+        "JavaScript",
+        "React",
+        "Django",
+        "SQL"
+    ],
+    "education_required": [
+        "Bachelor's Degree in Computer Science",
+        "Master's Degree in a related field (preferred)"
+    ],
+    "description": """
+    We are looking for a Software Engineer to join our dynamic team. 
+    You will be responsible for designing and developing high-quality software solutions, 
+    collaborating with cross-functional teams, and contributing to all phases of the software development lifecycle.
+    The ideal candidate will have a passion for technology and the ability to work in a fast-paced environment.
+    """
+}
     insights = query_bedrock(job_data)
     
     return {
