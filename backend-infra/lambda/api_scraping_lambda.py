@@ -3,6 +3,7 @@ from mangum import Mangum
 from pydantic import BaseModel, HttpUrl
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -24,6 +25,10 @@ class UrlInput(BaseModel):
     url: HttpUrl
 
 def scrape_job_offer(url):
+    # Set up paths for the binary and chromedriver
+    chromedriver_path = "/opt/chromedriver"  # Update this path based on your setup
+    chrome_binary_path = "/opt/headless-chromium"  # Update this path based on your setup
+
     # Set up Selenium with Chrome in headless mode
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -33,7 +38,11 @@ def scrape_job_offer(url):
     chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
     chrome_options.binary_location = chrome_binary_path
 
-    driver = webdriver.Chrome(executable_path=chromedriver_path, options=chrome_options)
+    # Use Service class to specify chromedriver path
+    service = Service(executable_path=chromedriver_path)
+
+    # Pass the service and options to the Chrome WebDriver
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
         driver.get(url)
@@ -47,9 +56,11 @@ def scrape_job_offer(url):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(2)  # Wait for any lazy-loaded content
 
+        # Parse the page source with BeautifulSoup
         html_content = driver.page_source
         soup = BeautifulSoup(html_content, 'html.parser')
 
+        # Extract job details
         job_data = {
             "title": soup.find("h2", class_="jobsearch-JobInfoHeader-title").text.strip() if soup.find("h2", class_="jobsearch-JobInfoHeader-title") else "N/A",
             "company": soup.find("div", {"data-company-name": "true"}).text.strip() if soup.find("div", {"data-company-name": "true"}) else "N/A",
