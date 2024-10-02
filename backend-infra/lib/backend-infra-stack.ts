@@ -20,25 +20,9 @@ export class MyBackendStack extends cdk.Stack {
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       timeToLiveAttribute: 'ttl',
     });
-    // Step 1: Create an ECR repository for storing Docker images
-    const ecrRepository = new ecr.Repository(this, 'JobScraperEcrRepo', {
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteImages: true, // In production, use RETAIN to avoid accidental deletion
-    });
 
-    ecrRepository.addLifecycleRule({
-      maxImageCount: 1,  // Keep only the last 3 images
-    });
-    // Step 2: Build and push Docker image to ECR from local directory ('lambda-scraping')
-    const dockerImageAsset = new ecrAssets.DockerImageAsset(this, 'ScrapingLambdaImage', {
-      directory: 'lambdas/lambda-scraping',  // Directory containing the Dockerfile and app code
-    });
-
-    // Step 3: Lambda function using the image from ECR
     const scrapingLambda = new lambda.DockerImageFunction(this, 'ScrapingLambda', {
-      code: lambda.DockerImageCode.fromEcr(ecrRepository, {
-        tagOrDigest: dockerImageAsset.imageUri.split('@')[1] || dockerImageAsset.imageUri.split(':')[1],
-      }),
+      code: lambda.DockerImageCode.fromImageAsset('lambdas/lambda-scraping'),
       memorySize: 2048,
       timeout: cdk.Duration.seconds(60),
       environment: {
