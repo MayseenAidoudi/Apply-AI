@@ -7,7 +7,7 @@ import * as ecrAssets from 'aws-cdk-lib/aws-ecr-assets'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
 
-export class JobScraperStack extends cdk.Stack {
+export class MyBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
