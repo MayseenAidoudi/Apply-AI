@@ -6,6 +6,7 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 import * as ecrAssets from 'aws-cdk-lib/aws-ecr-assets'
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
+import path = require('path');
 
 export class MyBackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -21,13 +22,22 @@ export class MyBackendStack extends cdk.Stack {
       timeToLiveAttribute: 'ttl',
     });
 
-    const scrapingLambda = new lambda.DockerImageFunction(this, 'ScrapingLambda', {
-      code: lambda.DockerImageCode.fromImageAsset('lambdas/lambda-scraping'),
-      memorySize: 2048,
-      timeout: cdk.Duration.seconds(60),
+    const layer = new lambda.LayerVersion(this, 'JobScraperLayer', {
+      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda-layer/layer.zip')),
+      compatibleRuntimes: [lambda.Runtime.PYTHON_3_9],
+      description: 'Dependencies for job scraper Lambda',
+    });
+
+    const scrapingLambda = new lambda.Function(this, 'ScrapingLambda', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'api_scraping_lambda.handler',
+      code: lambda.Code.fromAsset('lambdas/lambda_scraping'),
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(30),
       environment: {
         STATUS_TABLE_NAME: statusTable.tableName,
       },
+      layers: [layer],
     });
 
     // AI Processing Lambda (regular Lambda)
