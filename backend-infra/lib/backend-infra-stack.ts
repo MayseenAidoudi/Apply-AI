@@ -82,7 +82,7 @@ export class MyBackendStack extends cdk.Stack {
       description: 'This service scrapes job offers and provides AI-powered insights.',
     });
 
-    const scrapeResource = api.root.addResource('scrapeJobOffer');
+    const scrapeResource = api.root.addResource('scrapeAndGenerate');
     scrapeResource.addMethod('POST', new apigateway.LambdaIntegration(scrapingLambda));
 
     const statusResource = api.root.addResource('status');
