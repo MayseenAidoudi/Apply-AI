@@ -6,12 +6,15 @@ import boto3
 import json
 import os
 from firecrawl import FirecrawlApp
+import logging
 
 # Initialize Bedrock, Lambda, and DynamoDB clients
 bedrock = boto3.client('bedrock-runtime')
 dynamodb = boto3.resource('dynamodb')
 status_table = dynamodb.Table(os.environ['STATUS_TABLE_NAME'])
-
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 # Firecrawl API initialization
 app = FirecrawlApp(api_key=os.environ['FIRECRAWL_API_KEY'])
 
@@ -33,15 +36,17 @@ class UrlInput(BaseModel):
 def scrape_job_offer(url):
     try:
         # Use Firecrawl to scrape job details
+        logger.info(f"Scraping URL: {url}")
         job_data = app.scrape_url(url, {
             'formats': ['extract'],
             'extract': {
                 'schema': JobExtractSchema.model_json_schema(),
             }
         })
-        
+        logger.info(f"Scraped data: {job_data['extract']}")
         return job_data['extract']
     except Exception as e:
+        logger.error(f"Error scraping job offer: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error occurred while scraping job offer: {str(e)}")
 
 def generate_cv_and_motivation_letter(job_data, user_profile):
@@ -74,7 +79,7 @@ def generate_cv_and_motivation_letter(job_data, user_profile):
             "input": prompt
         })
     )
-
+    logger.info(f"Received response from Bedrock: {response}")
     response_body = json.loads(response['body'])
     
     # Extract generated CV and motivation letter
@@ -85,8 +90,10 @@ def generate_cv_and_motivation_letter(job_data, user_profile):
 @fastapi_app.post("/scrapeAndGenerate")
 async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
     job_id = str(uuid.uuid4())
-    
+    logger.info(f"Job ID generated: {job_id}")
+
     # Update the DynamoDB status table to 'SCRAPING'
+    logger.info(f"Updating DynamoDB with SCRAPING status for job ID: {job_id}")
     status_table.put_item(
         Item={
             'jobId': job_id,
@@ -98,8 +105,10 @@ async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
     try:
         # Scrape job details using Firecrawl
         job_data = scrape_job_offer(url_input.url)
-        
+        logger.info(f"Scraped job data: {job_data}")
+
         # Update status to 'PROCESSING'
+        logger.info(f"Updating DynamoDB to PROCESSING for job ID: {job_id}")
         status_table.update_item(
             Key={'jobId': job_id},
             UpdateExpression='SET #s = :s, #jd = :jd',
@@ -110,7 +119,10 @@ async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
         # Generate custom CV and motivation letter using Bedrock
         generated_cv_and_letter = generate_cv_and_motivation_letter(job_data, user_profile)
         
+        logger.info("Successfully generated CV and motivation letter.")
+
         # Update the status to 'COMPLETED'
+        logger.info(f"Updating DynamoDB to COMPLETED for job ID: {job_id}")
         status_table.update_item(
             Key={'jobId': job_id},
             UpdateExpression='SET #s = :s, #result = :r',
@@ -121,6 +133,7 @@ async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
         return {"jobId": job_id, "message": "Job scraping and document generation completed", "result": generated_cv_and_letter}
     
     except Exception as e:
+        logger.error(f"Error processing job: {str(e)}")
         # Update status to 'FAILED'
         status_table.update_item(
             Key={'jobId': job_id},
