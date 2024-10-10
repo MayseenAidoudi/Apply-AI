@@ -28,7 +28,7 @@ export class MyBackendStack extends cdk.Stack {
       description: 'Dependencies for job scraper Lambda',
     });
 
-    const scrapingLambda = new lambda.Function(this, 'ScrapingLambda', {
+    const MainScrapingLambda = new lambda.Function(this, 'ScrapingLambda', {
       runtime: lambda.Runtime.PYTHON_3_9,
       handler: 'api_scraping_lambda.handler',
       code: lambda.Code.fromAsset('lambdas/lambda_scraping'),
@@ -65,10 +65,10 @@ export class MyBackendStack extends cdk.Stack {
     });
 
     // Grant permissions
-    statusTable.grantReadWriteData(scrapingLambda);
+    statusTable.grantReadWriteData(MainScrapingLambda);
     statusTable.grantReadWriteData(aiProcessingLambda);
     statusTable.grantReadData(statusCheckingLambda);
-    aiProcessingLambda.grantInvoke(scrapingLambda);
+    aiProcessingLambda.grantInvoke(MainScrapingLambda);
 
     // Grant Bedrock permissions to AI Processing Lambda
     aiProcessingLambda.addToRolePolicy(new iam.PolicyStatement({
@@ -83,7 +83,7 @@ export class MyBackendStack extends cdk.Stack {
     });
 
     const scrapeResource = api.root.addResource('scrapeAndGenerate');
-    scrapeResource.addMethod('POST', new apigateway.LambdaIntegration(scrapingLambda));
+    scrapeResource.addMethod('POST', new apigateway.LambdaIntegration(MainScrapingLambda));
 
     const statusResource = api.root.addResource('status');
     statusResource.addMethod('GET', new apigateway.LambdaIntegration(statusCheckingLambda));
