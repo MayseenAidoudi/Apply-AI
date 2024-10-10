@@ -18,6 +18,15 @@ app = FirecrawlApp(api_key=os.environ['FIRECRAWL_API_KEY'])
 # FastAPI app setup
 fastapi_app = FastAPI()
 
+class JobExtractSchema(BaseModel):
+    job_title: str = Field(..., description="The title of the job position")
+    company_name: str = Field(..., description="The name of the company offering the job")
+    location: str = Field(..., description="The location of the job")
+    job_description: str = Field(..., description="A brief description of the job")
+    requirements: list[str] = Field(..., description="List of job requirements")
+    salary_range: str = Field(..., description="The salary range for the position, if available")
+
+
 class UrlInput(BaseModel):
     url: HttpUrl
 
@@ -27,14 +36,7 @@ def scrape_job_offer(url):
         job_data = app.scrape_url(url, {
             'formats': ['extract'],
             'extract': {
-                'schema': {
-                    'job_title': "string",
-                    'company_name': "string",
-                    'location': "string",
-                    'job_description': "string",
-                    'requirements': "list",
-                    'salary_range': "string"
-                }
+                'schema': JobExtractSchema.model_json_schema(),
             }
         })
         
