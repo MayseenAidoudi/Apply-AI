@@ -1,7 +1,7 @@
 import uuid
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, Field
 import boto3
 import json
 import os
