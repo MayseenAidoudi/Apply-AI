@@ -72,7 +72,7 @@ export class MyBackendStack extends cdk.Stack {
     aiProcessingLambda.grantInvoke(MainScrapingLambda);
 
     // Grant Bedrock permissions to AI Processing Lambda
-    aiProcessingLambda.addToRolePolicy(new iam.PolicyStatement({
+    MainScrapingLambda.addToRolePolicy(new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel'],
       resources: ['*'],
     }));
