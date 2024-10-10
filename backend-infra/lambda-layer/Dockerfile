@@ -1,16 +1,19 @@
-FROM public.ecr.aws/lambda/python:3.9
+FROM amazonlinux:2023
 
-# Install zip utility
-RUN yum install -y zip
+# Install Python
+RUN yum install -y python3 && \
+    yum install -y python3-pip && \
+    yum install -y zip && \
+    yum clean all
 
-# Copy requirements file
-COPY requirements.txt .
+# Set up PIP and Venv
+RUN python3 -m venv base
+RUN source base/bin/activate
 
 # Install dependencies
-RUN pip install -r requirements.txt -t /opt/python
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt -t ./python
 
-# Create zip file
-RUN cd /opt && zip -r9 /tmp/layer.zip python
-
-# Set the entrypoint to copy the zip file to the mounted volume
-ENTRYPOINT ["/bin/sh", "-c", "cp /tmp/layer.zip /asset-output/ && echo 'Lambda layer created successfully'"]
+# Zip it up for deployment.
+RUN zip -r layer.zip ./python/
+ENTRYPOINT ["/bin/bash", "-l"]
