@@ -23,7 +23,7 @@ export class MyBackendStack extends cdk.Stack {
     });
 
     const layer = new lambda.LayerVersion(this, 'JobScraperLayer', {
-      code: lambda.Code.fromAsset(path.join(__dirname, '../lambda-layer/layer.zip')),
+      code: lambda.Code.fromAsset('lmabda-layer/layer.zip'),
       compatibleRuntimes: [lambda.Runtime.PYTHON_3_9],
       description: 'Dependencies for job scraper Lambda',
     });
