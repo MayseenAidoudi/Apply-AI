@@ -40,7 +40,7 @@ def scrape_job_offer(url):
         job_data = app.scrape_url(url, {
             'formats': ['extract'],
             'extract': {
-                'schema': JobExtractSchema.model_json_schema(),
+                'schema': JobExtractSchema.schema(),
             }
         })
         logger.info(f"Scraped data: {job_data['extract']}")
