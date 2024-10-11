@@ -29,7 +29,6 @@ class JobExtractSchema(BaseModel):
     requirements: list[str] = Field(..., description="List of job requirements")
     salary_range: str = Field(..., description="The salary range for the position, if available")
 
-
 class UrlInput(BaseModel):
     url: HttpUrl
 
@@ -76,14 +75,14 @@ def generate_cv_and_motivation_letter(job_data, user_profile):
         contentType="application/json",
         accept="application/json",
         body=json.dumps({
-            "input": prompt
+            "prompt": prompt
         })
     )
     logger.info(f"Received response from Bedrock: {response}")
-    response_body = json.loads(response['body'])
+    response_body = json.loads(response.get('body').read())
     
     # Extract generated CV and motivation letter
-    generated_text = response_body['generated_text']
+    generated_text = response_body['generation']
     
     return generated_text
 
@@ -125,7 +124,7 @@ async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
         logger.info(f"Updating DynamoDB to COMPLETED for job ID: {job_id}")
         status_table.update_item(
             Key={'jobId': job_id},
-            UpdateExpression='SET #s = :s, #result = :r',
+            UpdateExpression='SET #s = :s, #r = :r',
             ExpressionAttributeNames={'#s': 'status', '#r': 'result'},
             ExpressionAttributeValues={':s': 'COMPLETED', ':r': generated_cv_and_letter}
         )
