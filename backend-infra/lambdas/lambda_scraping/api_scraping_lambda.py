@@ -51,34 +51,43 @@ def scrape_job_offer(url):
 def generate_cv_and_motivation_letter(job_data, user_profile):
     # Prepare the prompt for Bedrock
     prompt = f"""
-    Create a custom CV, motivation letter, and job compatibility percentage for the following job posting:
-    
+    <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+    You are an AI assistant that generates CVs, motivation letters, and job compatibility percentages. You must always respond with a single, valid JSON object. Do not include any text outside of the JSON structure. Write the JSON in ONE LINE NO FORMATING CARACTERS.
+    <|eot_id|>
+
+    <|start_header_id|>user<|end_header_id|>
+    Generate a custom CV, motivation letter, and job compatibility percentage for the following job posting:
+
     Job Title: {job_data['job_title']}
     Company: {job_data['company_name']}
     Location: {job_data['location']}
     Job Description: {job_data['job_description']}
     Requirements: {', '.join(job_data['requirements'])}
     Salary Range: {job_data['salary_range']}
-    
+
     Based on the user's profile:
     Name: {user_profile['name']}
     Skills: {', '.join(user_profile['skills'])}
     Experience: {user_profile['experience']}
     Education: {user_profile['education']}
-    
+
     Generate a professional CV, a tailored motivation letter, and calculate a job compatibility percentage based on how well the user's profile matches the job requirements.
-    
-    Return your response as a JSON object with the following structure:
+
+    Respond with a JSON object using the following structure:
     {{
         "cv": "The generated CV content",
         "motivation_letter": "The generated motivation letter content",
-        "compatibility_percentage": A number between 0 and 100 representing the job compatibility
+        "compatibility_percentage": 85
     }}
-    
-    Ensure that the JSON is properly formatted and can be parsed by Python's json.loads() function.
-    The output should be a valid JSON object, with no additional text.
 
-    """
+    Important:
+    1. Ensure the JSON is properly formatted and can be parsed by Python's json.loads() function.
+    2. The "cv" and "motivation_letter" values must be strings with proper escaping for any special characters.
+    3. The "compatibility_percentage" must be a number between 0 and 100.
+    4. Do not include any explanations or additional text outside the JSON structure.
+    <|eot_id|>
+
+    <|start_header_id|>assistant<|end_header_id|>"""
 
     # Call AWS Bedrock to process the prompt
     response = bedrock.invoke_model(
@@ -100,7 +109,7 @@ def generate_cv_and_motivation_letter(job_data, user_profile):
         generated_content = json.loads(response_body['generation'])
         return generated_content
     except json.JSONDecodeError:
-        logger.error("Failed to parse JSON from model response")
+        logger.error(f"Failed to parse JSON from model response {response_body['generation']}")
         raise HTTPException(status_code=500, detail="Failed to generate properly formatted response")
     
 
