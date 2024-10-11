@@ -51,7 +51,7 @@ def scrape_job_offer(url):
 def generate_cv_and_motivation_letter(job_data, user_profile):
     # Prepare the prompt for Bedrock
     prompt = f"""
-    Create a custom CV and motivation letter for the following job posting:
+    Create a custom CV, motivation letter, and job compatibility percentage for the following job posting:
     
     Job Title: {job_data['job_title']}
     Company: {job_data['company_name']}
@@ -66,25 +66,43 @@ def generate_cv_and_motivation_letter(job_data, user_profile):
     Experience: {user_profile['experience']}
     Education: {user_profile['education']}
     
-    Generate both a professional CV and a tailored motivation letter for this job.
+    Generate a professional CV, a tailored motivation letter, and calculate a job compatibility percentage based on how well the user's profile matches the job requirements.
+    
+    Return your response as a JSON object with the following structure:
+    {{
+        "cv": "The generated CV content",
+        "motivation_letter": "The generated motivation letter content",
+        "compatibility_percentage": A number between 0 and 100 representing the job compatibility
+    }}
+    
+    Ensure that the JSON is properly formatted and can be parsed by Python's json.loads() function.
+    The output should be a valid JSON object, with no additional text.
+
     """
 
     # Call AWS Bedrock to process the prompt
     response = bedrock.invoke_model(
-        modelId=os.environ['BEDROCK_MODEL_ID'],  # Specify the correct model for text generation
+        modelId=os.environ['BEDROCK_MODEL_ID'],
         contentType="application/json",
         accept="application/json",
         body=json.dumps({
-            "prompt": prompt
+            "prompt": prompt,
+            "max_tokens_to_sample": 2000,
+            "temperature": 0.7,
+            "top_p": 0.8,
         })
     )
     logger.info(f"Received response from Bedrock: {response}")
     response_body = json.loads(response.get('body').read())
     
-    # Extract generated CV and motivation letter
-    generated_text = response_body['generation']
+    # Extract generated content
+    try:
+        generated_content = json.loads(response_body['generation'])
+        return generated_content
+    except json.JSONDecodeError:
+        logger.error("Failed to parse JSON from model response")
+        raise HTTPException(status_code=500, detail="Failed to generate properly formatted response")
     
-    return generated_text
 
 @fastapi_app.post("/scrapeAndGenerate")
 async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
@@ -115,10 +133,10 @@ async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
             ExpressionAttributeValues={':s': 'PROCESSING', ':jd': json.dumps(job_data)}
         )
         
-        # Generate custom CV and motivation letter using Bedrock
-        generated_cv_and_letter = generate_cv_and_motivation_letter(job_data, user_profile)
+        # Generate custom CV, motivation letter, and compatibility percentage using Bedrock
+        generated_content = generate_cv_and_motivation_letter(job_data, user_profile)
         
-        logger.info("Successfully generated CV and motivation letter.")
+        logger.info("Successfully generated CV, motivation letter, and compatibility percentage.")
 
         # Update the status to 'COMPLETED'
         logger.info(f"Updating DynamoDB to COMPLETED for job ID: {job_id}")
@@ -126,10 +144,10 @@ async def scrape_and_generate(url_input: UrlInput, user_profile: dict):
             Key={'jobId': job_id},
             UpdateExpression='SET #s = :s, #r = :r',
             ExpressionAttributeNames={'#s': 'status', '#r': 'result'},
-            ExpressionAttributeValues={':s': 'COMPLETED', ':r': generated_cv_and_letter}
+            ExpressionAttributeValues={':s': 'COMPLETED', ':r': json.dumps(generated_content)}
         )
         
-        return {"jobId": job_id, "message": "Job scraping and document generation completed", "result": generated_cv_and_letter}
+        return {"jobId": job_id, "message": "Job scraping and document generation completed", "result": generated_content}
     
     except Exception as e:
         logger.error(f"Error processing job: {str(e)}")
