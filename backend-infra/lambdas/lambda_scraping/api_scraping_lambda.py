@@ -87,7 +87,7 @@ def generate_cv_and_motivation_letter(job_data, user_profile):
         accept="application/json",
         body=json.dumps({
             "prompt": prompt,
-            "max_tokens_to_sample": 2000,
+            "max_gen_len": 2000,
             "temperature": 0.7,
             "top_p": 0.8,
         })
