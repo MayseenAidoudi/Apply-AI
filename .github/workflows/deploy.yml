@@ -1,44 +1,45 @@
 name: Deploy CDK Stack
-   on:
-     push:
-       branches:
-         - main
-     pull_request:
-       branches:
-         - main
 
-   jobs:
-     deploy:
-       runs-on: ubuntu-latest
-       defaults:
-         run:
-           working-directory: backend-infra
-       steps:
-       - uses: actions/checkout@v2
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-       - name: Set up Node.js
-         uses: actions/setup-node@v2
-         with:
-           node-version: '14'
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-infra
+    steps:
+      - uses: actions/checkout@v2
 
-       - name: Update npm
-         run: npm install -g npm@latest
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-       - name: Remove package-lock.json
-         run: rm -f package-lock.json
+      - name: Update npm
+        run: npm install -g npm@latest
 
-       - name: Install dependencies
-         run: npm install
+      - name: Remove package-lock.json
+        run: rm -f package-lock.json
 
-       - name: Install AWS CDK
-         run: npm install -g aws-cdk
+      - name: Install dependencies
+        run: npm install
 
-       - name: Configure AWS credentials
-         uses: aws-actions/configure-aws-credentials@v1
-         with:
-           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-           aws-region: ${{ secrets.AWS_REGION }}
+      - name: Install AWS CDK
+        run: npm install -g aws-cdk
 
-       - name: Deploy stack
-         run: cdk deploy --require-approval never
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy stack
+        run: cdk deploy --require-approval never
