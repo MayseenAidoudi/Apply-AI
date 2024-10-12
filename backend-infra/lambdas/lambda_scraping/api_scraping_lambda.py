@@ -53,7 +53,7 @@ def scrape_job_offer(url):
         raise HTTPException(status_code=500, detail=f"Error occurred while scraping job offer: {str(e)}")
 
 @fastapi_app.post("/scrapeAndGenerate")
-async def scrape(url_input: UrlInput):
+async def scrape(url_input: UrlInput, user_profile: dict):
     job_id = str(uuid.uuid4())
     logger.info(f"Job ID generated: {job_id}")
 
@@ -86,7 +86,7 @@ async def scrape(url_input: UrlInput):
         lambda_client.invoke(
             FunctionName='AIProcessingLambda',
             InvocationType='Event',
-            Payload=json.dumps({'jobId': job_id})
+            Payload=json.dumps({'jobId': job_id, 'userProfile' : user_profile})
         )
         
         return {"jobId": job_id, "message": "Job scraping completed and AI processing initiated"}

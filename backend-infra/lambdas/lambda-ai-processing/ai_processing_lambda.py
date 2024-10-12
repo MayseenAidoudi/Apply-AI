@@ -6,7 +6,7 @@ bedrock = boto3.client('bedrock-runtime')
 dynamodb = boto3.resource('dynamodb')
 status_table = dynamodb.Table(os.environ['STATUS_TABLE_NAME'])
 
-def query_bedrock(job_data):
+def query_bedrock(job_data, user_profile):
     # Prepare the prompt for Bedrock
     prompt = f"""
     <|begin_of_text|><|start_header_id|>system<|end_header_id|>
@@ -22,6 +22,12 @@ def query_bedrock(job_data):
     Job Description: {job_data['job_description']}
     Requirements: {', '.join(job_data['requirements'])}
     Salary Range: {job_data['salary_range']}
+
+    Based on the user's profile:
+    Name: {user_profile['name']}
+    Skills: {', '.join(user_profile['skills'])}
+    Experience: {user_profile['experience']}
+    Education: {user_profile['education']}
 
     Generate a professional CV, a tailored motivation letter, and calculate a job compatibility percentage based on how well a typical candidate's profile matches the job requirements.
 
@@ -65,13 +71,14 @@ def query_bedrock(job_data):
 
 def lambda_handler(event, context):
     job_id = event['jobId']
+    user_profile = event['userProfile']
     
     try:
         # Get job data from DynamoDB
         response = status_table.get_item(Key={'jobId': job_id})
         job_data = json.loads(response['Item']['jobData'])
         
-        generated_content = query_bedrock(job_data)
+        generated_content = query_bedrock(job_data, user_profile)
         
         # Update status to 'COMPLETED' with generated content
         status_table.update_item(
