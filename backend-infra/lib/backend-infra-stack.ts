@@ -37,6 +37,7 @@ export class MyBackendStack extends cdk.Stack {
       environment: {
         STATUS_TABLE_NAME: statusTable.tableName,
         BEDROCK_MODEL_ID: 'meta.llama3-8b-instruct-v1:0',
+        FIRECRAWL_API_KEY_PARAM: '/FIRECRAWL_API_KEY',
       },
       layers: [layer],
     });
@@ -69,6 +70,11 @@ export class MyBackendStack extends cdk.Stack {
     statusTable.grantReadWriteData(MainScrapingLambda);
     statusTable.grantReadWriteData(aiProcessingLambda);
     statusTable.grantReadData(statusCheckingLambda);
+    MainScrapingLambda.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ssm:GetParameter'],
+      resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter/FIRECRAWL_API_KEY`],
+    }));
+    
     aiProcessingLambda.grantInvoke(MainScrapingLambda);
 
     // Grant Bedrock permissions to AI Processing Lambda
