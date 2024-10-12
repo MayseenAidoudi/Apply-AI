@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as pipelines from 'aws-cdk-lib/pipelines';
-import { MyBackendStage } from './stage';
+import { MyBackendStage } from './OLD_stage';
 
 export class PipelineStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {

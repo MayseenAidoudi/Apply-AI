@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
-import { PipelineStack } from '../lib/pipeline-stack';
+import { MyBackendStack } from '../lib/backend-infra-stack';
 
 const app = new cdk.App();
-new PipelineStack(app, 'MyBackendPipelineStack', {
-  env: { 
-    account: process.env.CDK_DEFAULT_ACCOUNT, 
-    region: process.env.CDK_DEFAULT_REGION 
+new MyBackendStack(app, 'MyBackendStack', {
+  env: {
+    account: process.env.CDK_DEFAULT_ACCOUNT,
+    region: process.env.CDK_DEFAULT_REGION
   },
 });
