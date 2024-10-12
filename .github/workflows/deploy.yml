@@ -1,39 +1,45 @@
 name: Deploy CDK Stack
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+   on:
+     push:
+       branches:
+         - main
+     pull_request:
+       branches:
+         - main
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend-infra
-    steps:
-    - uses: actions/checkout@v2
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+       defaults:
+         run:
+           working-directory: backend-infra
+       steps:
+       - uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
+       - name: Set up Node.js
+         uses: actions/setup-node@v2
+         with:
+           node-version: '14'
 
-    - name: Install dependencies
-      run: npm ci
+       - name: Update npm
+         run: npm install -g npm@latest
 
-    - name: Install AWS CDK
-      run: npm install -g aws-cdk
+       - name: Remove package-lock.json
+         run: rm -f package-lock.json
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
+       - name: Install dependencies
+         run: npm install
 
-    - name: Deploy stack
-      run: cdk deploy --require-approval never
+       - name: Install AWS CDK
+         run: npm install -g aws-cdk
+
+       - name: Configure AWS credentials
+         uses: aws-actions/configure-aws-credentials@v1
+         with:
+           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           aws-region: ${{ secrets.AWS_REGION }}
+
+       - name: Deploy stack
+         run: cdk deploy --require-approval never
