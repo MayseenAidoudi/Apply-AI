@@ -52,7 +52,7 @@ def scrape_job_offer(url):
         logger.error(f"Error scraping job offer: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error occurred while scraping job offer: {str(e)}")
 
-@fastapi_app.post("/scrape")
+@fastapi_app.post("/scrapeAndGenerate")
 async def scrape(url_input: UrlInput):
     job_id = str(uuid.uuid4())
     logger.info(f"Job ID generated: {job_id}")
