@@ -4,10 +4,13 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'backend-infra/**' 
   pull_request:
     branches:
       - main
-
+    paths:
+      - 'backend-infra/**' 
 jobs:
   deploy:
     runs-on: ubuntu-latest
