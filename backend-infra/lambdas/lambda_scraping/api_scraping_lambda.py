@@ -18,8 +18,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
 # Firecrawl API initialization
-app = FirecrawlApp(api_key=os.environ['FIRECRAWL_API_KEY'])
-
+ssm = boto3.client('ssm')
+parameter = ssm.get_parameter(Name=os.getenv('FIRECRAWL_API_KEY_PARAM'), WithDecryption=True)
+firecrawl_api_key = parameter['Parameter']['Value']
+app = FirecrawlApp(api_key=firecrawl_api_key)
 # FastAPI app setup
 fastapi_app = FastAPI()
 
