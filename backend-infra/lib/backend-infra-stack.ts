@@ -36,7 +36,7 @@ export class MyBackendStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         STATUS_TABLE_NAME: statusTable.tableName,
-        BEDROCK_MODEL_ID: 'meta.llama3-70b-instruct-v1:0',
+        BEDROCK_MODEL_ID: 'meta.llama3-8b-instruct-v1:0',
       },
       layers: [layer],
     });
