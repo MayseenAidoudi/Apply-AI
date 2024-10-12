@@ -74,8 +74,12 @@ export class MyBackendStack extends cdk.Stack {
       actions: ['ssm:GetParameter'],
       resources: [`arn:aws:ssm:${this.region}:${this.account}:parameter/FIRECRAWL_API_KEY`],
     }));
+
+    MainScrapingLambda.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['lambda:InvokeFunction'],
+      resources: [aiProcessingLambda.functionArn],
+    }));
     
-    aiProcessingLambda.grantInvoke(MainScrapingLambda);
 
     // Grant Bedrock permissions to AI Processing Lambda
     aiProcessingLambda.addToRolePolicy(new iam.PolicyStatement({
