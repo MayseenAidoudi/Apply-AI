@@ -36,7 +36,6 @@ export class MyBackendStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         STATUS_TABLE_NAME: statusTable.tableName,
-        BEDROCK_MODEL_ID: 'meta.llama3-8b-instruct-v1:0',
         FIRECRAWL_API_KEY_PARAM: '/FIRECRAWL_API_KEY',
       },
       layers: [layer],
@@ -51,6 +50,7 @@ export class MyBackendStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
       environment: {
         STATUS_TABLE_NAME: statusTable.tableName,
+        BEDROCK_MODEL_ID: 'meta.llama3-8b-instruct-v1:0',
       },
     });
 
@@ -78,7 +78,7 @@ export class MyBackendStack extends cdk.Stack {
     aiProcessingLambda.grantInvoke(MainScrapingLambda);
 
     // Grant Bedrock permissions to AI Processing Lambda
-    MainScrapingLambda.addToRolePolicy(new iam.PolicyStatement({
+    aiProcessingLambda.addToRolePolicy(new iam.PolicyStatement({
       actions: ['bedrock:InvokeModel'],
       resources: ['*'],
     }));
