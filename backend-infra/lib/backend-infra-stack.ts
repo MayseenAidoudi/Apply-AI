@@ -96,17 +96,26 @@ export class MyBackendStack extends cdk.Stack {
     const scrapeResource = api.root.addResource('scrapeAndGenerate');
     scrapeResource.addMethod('POST', new apigateway.LambdaIntegration(MainScrapingLambda));
 
-    const options: apigateway.CorsOptions =  {
+    const optionsScrape: apigateway.CorsOptions =  {
       allowOrigins: ["*"],
-      allowMethods: apigateway.Cors.ALL_METHODS,
+      allowMethods: ["POST"],
       allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
    
     }
-    scrapeResource.addCorsPreflight(options)
+    scrapeResource.addCorsPreflight(optionsScrape)
+
+
 
     const statusResource = api.root.addResource('status');
     statusResource.addMethod('GET', new apigateway.LambdaIntegration(statusCheckingLambda));
-    statusResource.addCorsPreflight(options)
+
+    const optionsStatus: apigateway.CorsOptions =  {
+      allowOrigins: ["*"],
+      allowMethods: ["POST"],
+      allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+   
+    }
+    statusResource.addCorsPreflight(optionsStatus)
 
     // Output the API URL
     new cdk.CfnOutput(this, 'ApiUrl', {
