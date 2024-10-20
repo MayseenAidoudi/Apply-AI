@@ -26,7 +26,7 @@ def lambda_handler(event, context):
         }
         
         if status == 'COMPLETED':
-            result['insights'] = item.get('insights')
+            result['result'] = item.get('result')
         elif status == 'FAILED':
             result['error'] = item.get('error')
         
