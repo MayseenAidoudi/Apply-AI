@@ -111,7 +111,7 @@ export class MyBackendStack extends cdk.Stack {
 
     const optionsStatus: apigateway.CorsOptions =  {
       allowOrigins: ["*"],
-      allowMethods: ["POST"],
+      allowMethods: ["GET"],
       allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
    
     }
