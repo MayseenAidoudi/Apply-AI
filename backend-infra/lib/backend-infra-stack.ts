@@ -91,18 +91,22 @@ export class MyBackendStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, 'JobScraperApi', {
       restApiName: 'Job Scraper Service',
       description: 'This service scrapes job offers and provides AI-powered insights.',
-      defaultCorsPreflightOptions: {
-        allowOrigins: ["*"],
-        allowMethods: apigateway.Cors.ALL_METHODS,
-        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
-      },
     });
 
     const scrapeResource = api.root.addResource('scrapeAndGenerate');
     scrapeResource.addMethod('POST', new apigateway.LambdaIntegration(MainScrapingLambda));
 
+    const options: apigateway.CorsOptions =  {
+      allowOrigins: ["*"],
+      allowMethods: apigateway.Cors.ALL_METHODS,
+      allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
+   
+    }
+    scrapeResource.addCorsPreflight(options)
+
     const statusResource = api.root.addResource('status');
     statusResource.addMethod('GET', new apigateway.LambdaIntegration(statusCheckingLambda));
+    statusResource.addCorsPreflight(options)
 
     // Output the API URL
     new cdk.CfnOutput(this, 'ApiUrl', {
