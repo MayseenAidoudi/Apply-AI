@@ -1,5 +1,6 @@
 import uuid
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 from pydantic import BaseModel, HttpUrl, Field
 import boto3
@@ -24,6 +25,15 @@ firecrawl_api_key = parameter['Parameter']['Value']
 app = FirecrawlApp(api_key=firecrawl_api_key)
 # FastAPI app setup
 fastapi_app = FastAPI()
+fastapi_app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],
+
+)
 
 class JobExtractSchema(BaseModel):
     job_title: str = Field(..., description="The title of the job position")
