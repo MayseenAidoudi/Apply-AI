@@ -94,7 +94,7 @@ export class MyBackendStack extends cdk.Stack {
       defaultCorsPreflightOptions: {
         allowOrigins: ["*"],
         allowMethods: ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"],
-        allowHeaders: apiGateway.Cors.DEFAULT_HEADERS,
+        allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
       },
     });
 
