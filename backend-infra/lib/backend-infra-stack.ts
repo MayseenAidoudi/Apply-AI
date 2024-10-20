@@ -93,7 +93,7 @@ export class MyBackendStack extends cdk.Stack {
       description: 'This service scrapes job offers and provides AI-powered insights.',
       defaultCorsPreflightOptions: {
         allowOrigins: ["*"],
-        allowMethods: ["OPTIONS", "GET", "POST", "PUT", "PATCH", "DELETE"],
+        allowMethods: apigateway.Cors.ALL_METHODS,
         allowHeaders: apigateway.Cors.DEFAULT_HEADERS,
       },
     });
