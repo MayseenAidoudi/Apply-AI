@@ -105,6 +105,8 @@ export class MyBackendStack extends cdk.Stack {
     scrapeResource.addCorsPreflight(optionsScrape)
 
 
+    
+
 
     const statusResource = api.root.addResource('status');
     statusResource.addMethod('GET', new apigateway.LambdaIntegration(statusCheckingLambda));
