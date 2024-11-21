@@ -94,7 +94,7 @@ async def scrape(url_input: UrlInput, user_profile: dict):
         # Invoke the second Lambda function
         logger.info(f"Invoking AI processing Lambda for job ID: {job_id}")
         lambda_client.invoke(
-            FunctionName='arn:aws:lambda:eu-west-2:197371229171:function:MyBackendStack-AIProcessingLambda989B1A23-ejy29f0cJtY7',
+            FunctionName='arn:aws:lambda:eu-west-2:197371229171:function:MyBackendStack-AIProcessingLambda989B1A23-F5ZhNdThoEaK',
             InvocationType='Event',
             Payload=json.dumps({'jobId': job_id, 'userProfile' : user_profile})
         )

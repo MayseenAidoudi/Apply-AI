@@ -93,13 +93,15 @@ export class MyBackendStack extends cdk.Stack {
       description: 'This service scrapes job offers and provides AI-powered insights.',
     });
 
-    const scrapeResource = api.root.addResource('scrapeAndGenerate');
-    scrapeResource.addMethod('POST', new apigateway.LambdaIntegration(MainScrapingLambda));
+// Create resources
+const scrapeResource = api.root.addResource('scrapeAndGenerate');
+const statusResource = api.root.addResource('status');
 
+// Add all methods to scrapeAndGenerate
+scrapeResource.addMethod('ANY', new apigateway.LambdaIntegration(MainScrapingLambda));
 
-    const statusResource = api.root.addResource('status');
-    statusResource.addMethod('GET', new apigateway.LambdaIntegration(statusCheckingLambda));
-
+// Add all methods to status
+statusResource.addMethod('ANY', new apigateway.LambdaIntegration(statusCheckingLambda));
 
     // Output the API URL
     new cdk.CfnOutput(this, 'ApiUrl', {
