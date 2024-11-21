@@ -26,3 +26,6 @@ type ProfileForm = {
     }[];
     portfolio: string[];
   };
+
+
+  export default ProfileForm
