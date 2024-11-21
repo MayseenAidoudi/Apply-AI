@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-An innovative job platform leveraging AI technologies to revolutionize job matching and recruitment processes.
+An innovative job platform leveraging AI technologies to revolutionize job matching and recruitment processes. Still a work-in-progress
 
-## Deployment
+## Current Deployment
 
-[![Vercel Deployment](https://apply-ai-ten.vercel.app/)]
+![Current Deployment](./landingpage.PNG)
 
 **Continuous Deployment:** Automated via GitHub Actions to Vercel
 
