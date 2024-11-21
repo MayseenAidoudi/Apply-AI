@@ -125,7 +125,7 @@ function generate() {
           console.log(api_url);
           // Send the POST request to the API with the job URL and user profile
           const response = await axios.post(
-            "https://qs3nk6h3y6.execute-api.eu-west-2.amazonaws.com/prod/scrapeAndGenerate",
+            `${process.env.APPLY_API}`,
             {
               url_input: { url: jobUrl },
               user_profile: profile,
@@ -155,7 +155,7 @@ function generate() {
         try {
           const intervalId = setInterval(async () => {
             const statusResponse = await axios.get(
-              `https://qs3nk6h3y6.execute-api.eu-west-2.amazonaws.com/prod/status?jobId=b6a306e2-d15f-46d5-811d-d0d11c0f7703`,
+              `${process.env.APPLY_API}`,
               {
                 headers: {
                   'Content-Type': 'application/json',
