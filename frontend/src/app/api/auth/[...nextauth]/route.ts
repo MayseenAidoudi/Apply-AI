@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async session({ session, token }) {
+    async session({ session }) {
       if (session.user) {
         const result = await dynamoDb.get({
           TableName: "Users",
